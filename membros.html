@@ -133,25 +133,24 @@
 
         /* ── MOBILE ── */
         @media (max-width: 600px) {
-            body { padding: 10px; }
-
-            /* Stack cards: 2 on top, 1 full-width below */
-            .area-resumo {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
+            body { padding: 8px; }
+            
+            /* Mantém as colunas, mas reduz drasticamente o tamanho para caber */
+            th, td { 
+                padding: 8px 4px; 
+                font-size: 11px !important; 
             }
-            .card-total {
-                grid-column: 1 / -1;
+            
+            .col-tel-header, .col-tel-cell { 
+                display: table-cell !important; /* Garante que o telefone apareça */
+                font-size: 10px !important;
             }
-
-            .card { padding: 14px 10px; }
-            .card span { font-size: 9px; }
-            .card strong { font-size: 20px; }
-
-            /* Hide phone column */
-            .col-tel-header, .col-tel-cell { display: none; }
-
-            th, td { padding: 12px 10px; }
+        
+            .nome-membro, .col-nome {
+                max-width: 120px;
+                white-space: normal; /* Permite que nomes longos como REMETENTE INCERTO quebrem linha */
+                word-wrap: break-word;
+            }
         }
 
         @media (max-width: 380px) {
@@ -284,4 +283,5 @@
         carregar();
     </script>
 </body>
+
 </html>
