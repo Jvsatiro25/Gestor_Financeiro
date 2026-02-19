@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg-primary: #0a0f1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2332;
+            --border: #2a3441;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --accent: #10b981;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            padding: 16px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* ── CHART CONTAINER ── */
+        .chart-wrapper {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 16px;
+        }
+        .chart-inner {
+            /* On mobile: fixed minimum width so chart stays readable; user can scroll */
+            min-width: 500px;
+            height: 45vh;
+            min-height: 260px;
+            padding: 20px;
+        }
+
+        /* ── TOTAL CARD ── */
+        .card-total {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            border-bottom: 3px solid var(--accent);
+            padding: 20px 24px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .card-total span {
+            font-size: 11px; font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 1.5px;
+        }
+        .card-total strong {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 32px; font-weight: 700;
+            color: var(--accent);
+            margin-top: 8px; letter-spacing: -1px;
+        }
+
+        /* ── CATEGORY CARDS GRID ── */
+        .area-categorias {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .card-cat {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 16px 12px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-cat::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 3px;
+        }
+        .card-cat span {
+            font-size: 10px; font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .card-cat strong {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px; font-weight: 700;
+            margin-top: 6px; letter-spacing: -0.5px;
+        }
+
+        .cat-dizimo::after   { background: #10b981; }
+        .cat-dizimo strong   { color: #10b981; }
+        .cat-oferta::after   { background: #3b82f6; }
+        .cat-oferta strong   { color: #3b82f6; }
+        .cat-malawi::after   { background: #f59e0b; }
+        .cat-malawi strong   { color: #f59e0b; }
+        .cat-campanha::after { background: #ef4444; }
+        .cat-campanha strong { color: #ef4444; }
+
+        /* Scrollbar */
+        .chart-wrapper::-webkit-scrollbar { height: 5px; }
+        .chart-wrapper::-webkit-scrollbar-track { background: var(--bg-card); border-radius: 5px; }
+        .chart-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
+
+        /* ── MOBILE ── */
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+
+            .chart-inner { min-width: 420px; height: 38vh; min-height: 220px; padding: 14px; }
+
+            .card-total strong { font-size: 26px; }
+
+            /* 2x2 grid on mobile */
+            .area-categorias { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .card-cat { padding: 14px 10px; }
+            .card-cat span { font-size: 9px; }
+            .card-cat strong { font-size: 16px; }
+        }
+
+        @media (max-width: 380px) {
+            .chart-inner { min-width: 360px; }
+            .card-cat strong { font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Total card on top for mobile readability -->
+    <div class="card-total">
+        <span>Arrecadação Total</span>
+        <strong id="arrecadacaoTotal">R$ 0,00</strong>
+    </div>
+
+    <div class="chart-wrapper">
+        <div class="chart-inner">
+            <canvas id="meuGrafico"></canvas>
+        </div>
+    </div>
+
+    <div class="area-categorias">
+        <div class="card-cat cat-dizimo">
+            <span>Dízimo</span>
+            <strong id="totalDizimo">R$ 0,00</strong>
+        </div>
+        <div class="card-cat cat-oferta">
+            <span>Oferta</span>
+            <strong id="totalOferta">R$ 0,00</strong>
+        </div>
+        <div class="card-cat cat-malawi">
+            <span>Malawi</span>
+            <strong id="totalMalawi">R$ 0,00</strong>
+        </div>
+        <div class="card-cat cat-campanha">
+            <span>Campanha</span>
+            <strong id="totalCampanha">R$ 0,00</strong>
+        </div>
+    </div>
+
+    <script>
+        const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTVFsO0U3JTeEpqIks1fpNUNiHF5J6Pgyv7yYiJKFgqyI08Y_sRB2nnikRvfT4W5CcwQwAW5r0Lvt1x/pub?output=csv';
+        let dadosRaw = [], chart;
+
+        const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.borderColor = '#2a3441';
+
+        async function carregar() {
+            try {
+                const res = await fetch(url + '&cache=' + Date.now());
+                const csv = await res.text();
+                dadosRaw = csv.split('\n').slice(1).filter(l => l.trim()).map(l => {
+                    const c = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/^"|"$/g,'').trim());
+                    let [d,m,a] = c[0].split('/');
+                    return {
+                        data: c[0], mesAno: `${m}/${a}`, ano: a,
+                        valor: parseFloat(c[3].replace(/[R$\s.]/g,'').replace(',','.')) || 0,
+                        cat: c[4].toLowerCase().includes("dizimo") ? "Dízimo" : c[4]
+                    };
+                });
+                renderizar();
+            } catch(e) { console.error(e); }
+        }
+
+        function renderizar(periodo="Todos") {
+            const f = dadosRaw.filter(r =>
+                periodo === "Todos" ? true
+                : periodo.length === 4 ? r.ano === periodo
+                : r.mesAno === periodo
+            );
+
+            const soma = f.reduce((s,r) => s+r.valor, 0);
+            document.getElementById('arrecadacaoTotal').innerText = fmt(soma);
+            document.getElementById('totalDizimo').innerText   = fmt(f.filter(r=>r.cat==="Dízimo").reduce((s,r)=>s+r.valor,0));
+            document.getElementById('totalOferta').innerText   = fmt(f.filter(r=>r.cat==="Oferta").reduce((s,r)=>s+r.valor,0));
+            document.getElementById('totalMalawi').innerText   = fmt(f.filter(r=>r.cat==="Malawi").reduce((s,r)=>s+r.valor,0));
+            document.getElementById('totalCampanha').innerText = fmt(f.filter(r=>r.cat==="Campanha").reduce((s,r)=>s+r.valor,0));
+
+            const labels = [...new Set(f.map(r=>r.data))].sort((a,b) => {
+                const [d1,m1,y1]=a.split('/'), [d2,m2,y2]=b.split('/');
+                return new Date(y1,m1-1,d1) - new Date(y2,m2-1,d2);
+            });
+
+            const cats = ["Dízimo","Oferta","Malawi","Campanha"];
+            const cores = { "Dízimo":"#10b981","Oferta":"#3b82f6","Malawi":"#f59e0b","Campanha":"#ef4444" };
+
+            const datasets = cats.map(c => ({
+                label: c,
+                backgroundColor: cores[c],
+                data: labels.map(l => f.filter(r=>r.data===l&&r.cat===c).reduce((s,r)=>s+r.valor,0)),
+                borderRadius: 4, borderSkipped: false
+            }));
+
+            if (chart) chart.destroy();
+            chart = new Chart(document.getElementById('meuGrafico'), {
+                type: 'bar',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#1e293b' },
+                            ticks: {
+                                callback: v => 'R$ ' + v.toLocaleString('pt-BR'),
+                                font: { family: "'JetBrains Mono', monospace", size: 10 },
+                                maxTicksLimit: 6
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { family: "'DM Sans', sans-serif", size: 11 },
+                                maxRotation: 45, minRotation: 0
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true, pointStyle: 'circle',
+                                padding: 16,
+                                font: { family: "'DM Sans', sans-serif", size: 12, weight: '500' }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: '#1a2332',
+                            titleColor: '#f1f5f9', bodyColor: '#94a3b8',
+                            borderColor: '#2a3441', borderWidth: 1,
+                            cornerRadius: 8, padding: 12,
+                            titleFont: { family: "'DM Sans', sans-serif", size: 13, weight: '600' },
+                            bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
+                            callbacks: {
+                                label: ctx => `${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('message', e => {
+            if (e.data.periodo) renderizar(e.data.periodo);
+        });
+
+        carregar();
+    </script>
+</body>
+</html>
