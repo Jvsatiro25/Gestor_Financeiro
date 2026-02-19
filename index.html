@@ -185,12 +185,15 @@
         }
 
         @media (max-width: 420px) {
-            .navbar { padding: 0 10px; }
-            select { font-size: 11px; padding: 6px 24px 6px 8px; }
-            #filtroCat { max-width: 100px; }
-            #filtroPeriodo { max-width: 110px; }
-            .nav-brand-text { display: none; }
+            .navbar { padding: 0 8px; }
+            .nav-brand-text { 
+                display: block !important; /* Força a exibição */
+                font-size: 11px; 
+                line-height: 1.1;
+            }
+            select { font-size: 10px; min-width: 80px; }
         }
+        
     </style>
 </head>
 <body>
@@ -324,3 +327,4 @@
     </script>
 </body>
 </html>
+
