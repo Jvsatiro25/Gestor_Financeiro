@@ -3,152 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        :root {
-            --bg-primary: #0a0f1a;
-            --bg-secondary: #111827;
-            --bg-card: #1a2332;
-            --border: #2a3441;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --accent: #10b981;
-        }
-
-        body {
-            font-family: 'DM Sans', -apple-system, sans-serif;
-            padding: 16px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            min-height: 100vh;
-        }
-
-        .table-container {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            overflow: hidden;
-            /* Allow horizontal scroll on the container itself for mobile */
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            /* Minimum width so columns don't get crushed */
-            min-width: 480px;
-        }
-
-        th {
-            background: var(--bg-card);
-            padding: 14px 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-secondary);
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border);
-            font-size: 13px;
-            color: var(--text-primary);
-            white-space: nowrap;
-        }
-
-        tr:last-child td { border-bottom: none; }
-        tr:hover td { background: rgba(16, 185, 129, 0.05); }
-
-        .col-data {
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-        }
-        .col-telefone {
-            color: var(--text-muted);
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-        }
-        .col-nome { font-weight: 600; }
-        .col-valor {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .col-categoria {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-        }
-        .cat-dizimo  { background: rgba(16,185,129,0.15); color: #34d399; }
-        .cat-oferta  { background: rgba(59,130,246,0.15); color: #60a5fa; }
-        .cat-malawi  { background: rgba(245,158,11,0.15); color: #fbbf24; }
-        .cat-campanha{ background: rgba(239,68,68,0.15);  color: #f87171; }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        /* ── MOBILE: hide telefone column to save space ── */
+        :root { --bg-primary: #0a0f1a; --bg-secondary: #111827; --border: #2a3441; --text-primary: #f1f5f9; --accent: #10b981; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg-primary); padding: 10px; }
+        .table-container { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 400px; }
+        th { background: #1a2332; padding: 12px 8px; font-size: 10px; color: #94a3b8; text-transform: uppercase; text-align: left; }
+        td { padding: 12px 8px; border-bottom: 1px solid var(--border); font-size: 11px; color: var(--text-primary); }
+        .col-nome { font-weight: 600; white-space: normal; word-break: break-word; max-width: 110px; }
+        .col-tel { font-family: 'JetBrains Mono'; font-size: 9px; color: #64748b; }
+        .col-valor { font-family: 'JetBrains Mono'; color: var(--accent); font-weight: 700; }
+        .cat-tag { padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: 700; text-transform: uppercase; }
+        .cat-Dízimo { background: rgba(16,185,129,0.1); color: #34d399; }
+        .cat-Oferta { background: rgba(59,130,246,0.1); color: #60a5fa; }
         @media (max-width: 600px) {
-            body { padding: 10px; }
-            .col-tel-header, .col-tel-cell { display: none; }
-            table { min-width: 320px; }
-            td, th { padding: 12px 10px; }
+            td, th { padding: 8px 4px; font-size: 10px; }
+            .col-tel { display: block; margin-top: 2px; }
         }
     </style>
 </head>
 <body>
     <div class="table-container">
         <table>
-            <thead>
-                <tr>
-                    <th>Data</th>
-                    <th class="col-tel-header">Telefone</th>
-                    <th>Nome</th>
-                    <th>Valor</th>
-                    <th>Categoria</th>
-                </tr>
-            </thead>
+            <thead><tr><th>Data</th><th>Doador / Tel</th><th>Valor</th><th>Cat</th></tr></thead>
             <tbody id="corpoTabela"></tbody>
         </table>
     </div>
-
     <script>
         const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTVFsO0U3JTeEpqIks1fpNUNiHF5J6Pgyv7yYiJKFgqyI08Y_sRB2nnikRvfT4W5CcwQwAW5r0Lvt1x/pub?output=csv';
         let registros = [];
-
-        const padronizarTel = t => {
+        const padronizar = t => {
             let n = String(t).replace(/\D/g, "");
-            if(n.length <= 11) n = "55" + (n.length <= 9 ? "24" : "") + (n.length===8?"9":"") + n;
-            return n.length >= 12 ? `+${n.substring(0,2)} (${n.substring(2,4)}) ${n.substring(4,9)}-${n.substring(9,13)}` : "N/A";
+            return n.length > 8 ? `(${n.slice(-11,-9)}) ${n.slice(-4)}` : "N/A";
         };
-
-        function getCategoriaClass(cat) {
-            const c = cat.toLowerCase();
-            if (c.includes('dizimo') || c.includes('dízimo')) return 'cat-dizimo';
-            if (c.includes('oferta'))   return 'cat-oferta';
-            if (c.includes('malawi'))   return 'cat-malawi';
-            if (c.includes('campanha')) return 'cat-campanha';
-            return 'cat-oferta';
-        }
 
         async function carregar() {
             const res = await fetch(url + '&cache=' + Date.now());
@@ -156,40 +45,15 @@
             registros = csv.split('\n').slice(1).filter(l=>l.trim()).map(l=>{
                 const c = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v=>v.replace(/^"|"$/g,'').trim());
                 let [d,m,a] = c[0].split('/');
-                return {
-                    data: c[0], mesAno: `${m}/${a}`, ano: a,
-                    tel: padronizarTel(c[1]), nome: c[2].toUpperCase(),
-                    valor: c[3], cat: c[4].toLowerCase().includes("dizimo") ? "Dízimo" : c[4],
-                    sort: new Date(a, m-1, d)
-                };
+                return { data: c[0], tel: c[1], nome: c[2].toUpperCase(), valor: c[3], cat: c[4].toLowerCase().includes("dizimo") ? "Dízimo" : c[4], sort: new Date(a, m-1, d), mesAno: `${m}/${a}`, ano: a };
             }).sort((a,b)=>b.sort - a.sort);
             renderizar();
         }
 
         function renderizar(cat="Todas", periodo="Todos") {
-            const f = registros.filter(r => {
-                const matchCat = (cat === "Todas" || r.cat === cat);
-                const matchPeriodo = periodo === "Todos" ? true
-                    : periodo.length === 4 ? r.ano === periodo
-                    : r.mesAno === periodo;
-                return matchCat && matchPeriodo;
-            });
-
-            if (f.length === 0) {
-                document.getElementById('corpoTabela').innerHTML = `<tr><td colspan="5" class="empty-state">Nenhum registro encontrado</td></tr>`;
-                return;
-            }
-
-            document.getElementById('corpoTabela').innerHTML = f.map(r=>`
-                <tr>
-                    <td class="col-data">${r.data}</td>
-                    <td class="col-telefone col-tel-cell">${r.tel}</td>
-                    <td class="col-nome">${r.nome}</td>
-                    <td class="col-valor">${r.valor}</td>
-                    <td><span class="col-categoria ${getCategoriaClass(r.cat)}">${r.cat}</span></td>
-                </tr>`).join('');
+            const f = registros.filter(r => (cat === "Todas" || r.cat === cat) && (periodo === "Todos" || (periodo.length === 4 ? r.ano === periodo : r.mesAno === periodo)));
+            document.getElementById('corpoTabela').innerHTML = f.map(r=>`<tr><td>${r.data.slice(0,5)}</td><td><div class="col-nome">${r.nome}</div><div class="col-tel">${padronizar(r.tel)}</div></td><td class="col-valor">${r.valor}</td><td><span class="cat-tag cat-${r.cat}">${r.cat.slice(0,1)}</span></td></tr>`).join('');
         }
-
         window.addEventListener('message', e => renderizar(e.data.categoria, e.data.periodo));
         carregar();
     </script>
