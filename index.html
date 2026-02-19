@@ -28,7 +28,7 @@
             min-height: 100vh;
         }
 
-        /* ── NAVBAR ── */
+        /* NAVBAR */
         .navbar {
             background: var(--bg-secondary);
             padding: 0 24px;
@@ -41,7 +41,6 @@
             z-index: 200;
         }
 
-        /* Brand */
         .nav-brand {
             display: flex;
             align-items: center;
@@ -58,6 +57,7 @@
             font-weight: 700; font-size: 14px;
             color: var(--text-primary);
             white-space: nowrap;
+            line-height: 1.3;
         }
 
         /* Desktop nav tabs */
@@ -84,7 +84,12 @@
         .nav-btn svg { width: 15px; height: 15px; flex-shrink: 0; }
 
         /* Filters */
-        .filter-group { display: flex; gap: 10px; align-items: center; }
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         select {
             padding: 8px 32px 8px 12px;
             border-radius: 8px;
@@ -104,18 +109,22 @@
         select:hover, select:focus { border-color: var(--accent); outline: none; }
         select option { background: var(--bg-secondary); color: var(--text-primary); }
 
-        /* Hamburger (hidden on desktop) */
+        /* Hamburger */
         .hamburger { display: none; }
+
+        /* Mobile filter bar (below navbar) */
+        .filter-bar-mobile {
+            display: none;
+        }
 
         /* iframe */
         iframe {
             width: 100%;
-            height: calc(100vh - 60px);
             border: none;
             background: var(--bg-primary);
         }
 
-        /* ── MOBILE DROPDOWN MENU ── */
+        /* Mobile dropdown menu */
         .mobile-menu {
             display: none;
             position: absolute;
@@ -136,12 +145,15 @@
             font-size: 15px;
         }
 
-        /* ── RESPONSIVE ── */
+        /* MOBILE */
         @media (max-width: 768px) {
             .navbar { padding: 0 14px; }
 
             /* Hide desktop tabs */
             .nav-group { display: none; }
+
+            /* Hide filters from navbar on mobile */
+            .filter-group { display: none; }
 
             /* Show hamburger */
             .hamburger {
@@ -168,35 +180,37 @@
             .hamburger.open span:nth-child(2) { opacity: 0; }
             .hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
-            /* Compact filters */
-            .filter-group { gap: 6px; }
-            select {
-                min-width: 0;
-                font-size: 12px;
-                padding: 7px 28px 7px 10px;
+            /* Show filter bar below navbar on mobile */
+            .filter-bar-mobile {
+                display: flex;
+                gap: 10px;
+                align-items: center;
+                background: var(--bg-secondary);
+                border-bottom: 1px solid var(--border);
+                padding: 10px 14px;
+                position: relative;
+                z-index: 100;
             }
-            /* Hide category filter label/text overflow on very small screens */
-            #filtroCat { max-width: 120px; }
-            #filtroPeriodo { max-width: 130px; }
+            .filter-bar-mobile select {
+                min-width: 0;
+                flex: 1;
+                font-size: 13px;
+                padding: 8px 28px 8px 12px;
+            }
 
             .nav-brand-text { font-size: 13px; }
-
-            iframe { height: calc(100vh - 60px); }
         }
 
         @media (max-width: 420px) {
             .navbar { padding: 0 10px; }
-            select { font-size: 11px; padding: 6px 24px 6px 8px; }
-            #filtroCat { max-width: 100px; }
-            #filtroPeriodo { max-width: 110px; }
-            .nav-brand-text { display: none; }
+            .filter-bar-mobile { padding: 8px 10px; gap: 8px; }
+            .filter-bar-mobile select { font-size: 12px; padding: 7px 24px 7px 10px; }
         }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
-        <!-- Left: hamburger + brand -->
         <div style="display:flex;align-items:center;gap:10px;">
             <div class="hamburger" id="hamburger" onclick="toggleMenu()">
                 <span></span><span></span><span></span>
@@ -209,7 +223,7 @@
             </div>
         </div>
 
-        <!-- Center: desktop tabs -->
+        <!-- Desktop tabs -->
         <div class="nav-group" id="navDesktop">
             <button class="nav-btn active" onclick="mudarAba('planilha.html', this)">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
@@ -225,16 +239,16 @@
             </button>
         </div>
 
-        <!-- Right: filters -->
+        <!-- Desktop filters -->
         <div class="filter-group">
-            <select id="filtroCat" onchange="enviarFiltros()">
+            <select id="filtroCat" onchange="syncAndSend('cat', this.value)">
                 <option value="Todas">Todas Categorias</option>
                 <option value="Oferta">Oferta</option>
                 <option value="Dízimo">Dízimo</option>
                 <option value="Malawi">Malawi</option>
                 <option value="Campanha">Campanha</option>
             </select>
-            <select id="filtroPeriodo" onchange="enviarFiltros()">
+            <select id="filtroPeriodo" onchange="syncAndSend('periodo', this.value)">
                 <option value="Todos">Histórico Total</option>
             </select>
         </div>
@@ -256,10 +270,32 @@
         </button>
     </div>
 
+    <!-- Mobile filter bar: shown below navbar on small screens -->
+    <div class="filter-bar-mobile" id="filterBarMobile">
+        <select id="filtroCatMobile" onchange="syncAndSend('cat', this.value)">
+            <option value="Todas">Todas Categorias</option>
+            <option value="Oferta">Oferta</option>
+            <option value="Dízimo">Dízimo</option>
+            <option value="Malawi">Malawi</option>
+            <option value="Campanha">Campanha</option>
+        </select>
+        <select id="filtroPeriodoMobile" onchange="syncAndSend('periodo', this.value)">
+            <option value="Todos">Histórico Total</option>
+        </select>
+    </div>
+
     <iframe id="janela-aba" src="planilha.html"></iframe>
 
     <script>
         const nomesMeses = ["","Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+
+        function ajustarAltura() {
+            const navH = document.querySelector('.navbar').offsetHeight;
+            const filterBarH = document.getElementById('filterBarMobile').offsetHeight;
+            document.getElementById('janela-aba').style.height = (window.innerHeight - navH - filterBarH) + 'px';
+        }
+        window.addEventListener('resize', ajustarAltura);
+        ajustarAltura();
 
         function toggleMenu() {
             document.getElementById('mobileMenu').classList.toggle('open');
@@ -269,21 +305,34 @@
         function mudarAba(url, btn) {
             document.getElementById('janela-aba').src = url;
 
-            // Update active state on BOTH desktop and mobile buttons
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            // Mark all buttons with same url as active
             document.querySelectorAll('.nav-btn').forEach(b => {
                 if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(url)) {
                     b.classList.add('active');
                 }
             });
 
-            // Hide category filter on chart tab
-            document.getElementById('filtroCat').style.display = url === 'grafico.html' ? 'none' : '';
+            // Hide category filter on gráfico tab (both desktop and mobile)
+            const isGrafico = url === 'grafico.html';
+            document.getElementById('filtroCat').style.display = isGrafico ? 'none' : '';
+            document.getElementById('filtroCatMobile').style.display = isGrafico ? 'none' : '';
 
-            // Close mobile menu
             document.getElementById('mobileMenu').classList.remove('open');
             document.getElementById('hamburger').classList.remove('open');
+
+            setTimeout(ajustarAltura, 50);
+        }
+
+        // Sync both select pairs, then send message to iframe
+        function syncAndSend(tipo, valor) {
+            if (tipo === 'cat') {
+                document.getElementById('filtroCat').value = valor;
+                document.getElementById('filtroCatMobile').value = valor;
+            } else {
+                document.getElementById('filtroPeriodo').value = valor;
+                document.getElementById('filtroPeriodoMobile').value = valor;
+            }
+            enviarFiltros();
         }
 
         function enviarFiltros() {
@@ -308,16 +357,22 @@
                         mesesAnos.add(`${p[1].trim()}/${p[2].trim()}`);
                     }
                 });
-                const sel = document.getElementById('filtroPeriodo');
+
+                let opcoesHtml = '';
                 Array.from(anos).sort().reverse().forEach(a => {
-                    sel.innerHTML += `<option value="${a}" style="font-weight:bold;"> Ano ${a}</option>`;
+                    opcoesHtml += `<option value="${a}" style="font-weight:bold;"> Ano ${a}</option>`;
                     Array.from(mesesAnos).sort().reverse().forEach(ma => {
                         if (ma.endsWith(a)) {
                             const m = ma.split('/')[0];
-                            sel.innerHTML += `<option value="${ma}">&nbsp;&nbsp; ${nomesMeses[parseInt(m)]} / ${a}</option>`;
+                            opcoesHtml += `<option value="${ma}">&nbsp;&nbsp; ${nomesMeses[parseInt(m)]} / ${a}</option>`;
                         }
                     });
                 });
+
+                // Populate both desktop and mobile period selects
+                document.getElementById('filtroPeriodo').innerHTML += opcoesHtml;
+                document.getElementById('filtroPeriodoMobile').innerHTML += opcoesHtml;
+
             } catch(e) { console.error(e); }
         }
         carregarPeriodosDinamicos();
