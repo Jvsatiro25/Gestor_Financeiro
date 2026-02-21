@@ -14,7 +14,6 @@
             --bg-card: #1a2332;
             --border: #2a3441;
             --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
             --text-muted: #64748b;
             --accent: #10b981;
         }
@@ -27,32 +26,15 @@
             min-height: 100vh;
         }
 
-        /* ── CHART CONTAINER ── */
-        .chart-wrapper {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-bottom: 16px;
-        }
-        .chart-inner {
-            /* On mobile: fixed minimum width so chart stays readable; user can scroll */
-            min-width: 500px;
-            height: 45vh;
-            min-height: 260px;
-            padding: 20px;
-        }
-
         /* ── TOTAL CARD ── */
         .card-total {
             background: var(--bg-secondary);
             border-radius: 12px;
             border: 1px solid var(--border);
             border-bottom: 3px solid var(--accent);
-            padding: 20px 24px;
+            padding: 22px 24px;
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 24px;
         }
         .card-total span {
             font-size: 11px; font-weight: 600;
@@ -62,23 +44,55 @@
         .card-total strong {
             display: block;
             font-family: 'JetBrains Mono', monospace;
-            font-size: 32px; font-weight: 700;
+            font-size: 34px; font-weight: 700;
             color: var(--accent);
             margin-top: 8px; letter-spacing: -1px;
         }
 
-        /* ── CATEGORY CARDS GRID ── */
+        /* ── CHART CONTAINER ── */
+        .chart-wrapper {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 24px;
+            padding-bottom: 2px;
+        }
+        .chart-inner {
+            min-width: 100%;
+            height: 54vh;
+            min-height: 340px;
+            padding: 20px 24px 16px;
+        }
+
+        /* ── SCROLLBAR ── */
+        .chart-wrapper::-webkit-scrollbar { height: 8px; }
+        .chart-wrapper::-webkit-scrollbar-track {
+            background: var(--bg-card);
+            border-radius: 8px;
+            margin: 0 16px;
+        }
+        .chart-wrapper::-webkit-scrollbar-thumb {
+            background: #3d4f63;
+            border-radius: 8px;
+            border: 2px solid var(--bg-secondary);
+        }
+        .chart-wrapper::-webkit-scrollbar-thumb:hover { background: #5a6f87; }
+
+        /* ── CATEGORY CARDS ── */
         .area-categorias {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
+            gap: 14px;
         }
 
         .card-cat {
             background: var(--bg-secondary);
             border-radius: 12px;
             border: 1px solid var(--border);
-            padding: 16px 12px;
+            padding: 20px 14px 18px;
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -98,7 +112,8 @@
             display: block;
             font-family: 'JetBrains Mono', monospace;
             font-size: 18px; font-weight: 700;
-            margin-top: 6px; letter-spacing: -0.5px;
+            margin-top: 10px;
+            letter-spacing: -0.5px;
         }
 
         .cat-dizimo::after   { background: #10b981; }
@@ -110,42 +125,32 @@
         .cat-campanha::after { background: #ef4444; }
         .cat-campanha strong { color: #ef4444; }
 
-        /* Scrollbar */
-        .chart-wrapper::-webkit-scrollbar { height: 5px; }
-        .chart-wrapper::-webkit-scrollbar-track { background: var(--bg-card); border-radius: 5px; }
-        .chart-wrapper::-webkit-scrollbar-thumb { background: var(--border); border-radius: 5px; }
-
         /* ── MOBILE ── */
         @media (max-width: 600px) {
             body { padding: 10px; }
-
-            .chart-inner { min-width: 420px; height: 38vh; min-height: 220px; padding: 14px; }
-
-            .card-total strong { font-size: 26px; }
-
-            /* 2x2 grid on mobile */
+            .chart-inner { height: 46vh; min-height: 280px; padding: 14px 16px 12px; }
+            .card-total { margin-bottom: 20px; }
+            .card-total strong { font-size: 28px; }
+            .chart-wrapper { margin-bottom: 20px; }
             .area-categorias { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .card-cat { padding: 14px 10px; }
+            .card-cat { padding: 16px 10px 14px; }
             .card-cat span { font-size: 9px; }
-            .card-cat strong { font-size: 16px; }
+            .card-cat strong { font-size: 16px; margin-top: 8px; }
         }
-
         @media (max-width: 380px) {
-            .chart-inner { min-width: 360px; }
             .card-cat strong { font-size: 14px; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Total card on top for mobile readability -->
     <div class="card-total">
         <span>Arrecadação Total</span>
         <strong id="arrecadacaoTotal">R$ 0,00</strong>
     </div>
 
     <div class="chart-wrapper">
-        <div class="chart-inner">
+        <div class="chart-inner" id="chartInner">
             <canvas id="meuGrafico"></canvas>
         </div>
     </div>
@@ -174,6 +179,18 @@
         let dadosRaw = [], chart;
 
         const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+
+        // Cria gradiente vertical para cada cor
+        function makeGradient(ctx, color, alpha1 = 1, alpha2 = 0.55) {
+            const hex = color.replace('#','');
+            const r = parseInt(hex.slice(0,2),16);
+            const g = parseInt(hex.slice(2,4),16);
+            const b = parseInt(hex.slice(4,6),16);
+            const grad = ctx.createLinearGradient(0, 0, 0, ctx.canvas.height);
+            grad.addColorStop(0, `rgba(${r},${g},${b},${alpha1})`);
+            grad.addColorStop(1, `rgba(${r},${g},${b},${alpha2})`);
+            return grad;
+        }
 
         Chart.defaults.color = '#94a3b8';
         Chart.defaults.borderColor = '#2a3441';
@@ -214,59 +231,158 @@
                 return new Date(y1,m1-1,d1) - new Date(y2,m2-1,d2);
             });
 
-            const cats = ["Dízimo","Oferta","Malawi","Campanha"];
-            const cores = { "Dízimo":"#10b981","Oferta":"#3b82f6","Malawi":"#f59e0b","Campanha":"#ef4444" };
+            // Largura dinâmica: 130px por grupo
+            const totalW = Math.max(labels.length * 130 + 80, 420);
+            document.getElementById('chartInner').style.width = totalW + 'px';
 
-            const datasets = cats.map(c => ({
-                label: c,
-                backgroundColor: cores[c],
-                data: labels.map(l => f.filter(r=>r.data===l&&r.cat===c).reduce((s,r)=>s+r.valor,0)),
-                borderRadius: 4, borderSkipped: false
-            }));
+            // Se algum valor passa de 1500, expande a altura proporcionalmente
+            const Y_MAX = 1500;
+            const BASE_H = 54; // vh
+            document.getElementById('chartInner').style.height = BASE_H + 'vh';
+
+            const cats  = ["Dízimo","Oferta","Malawi","Campanha"];
+            const cores  = { "Dízimo":"#10b981","Oferta":"#3b82f6","Malawi":"#f59e0b","Campanha":"#ef4444" };
+            const realValues = {}; // guarda valor real para o tooltip mostrar corretamente
+
+            const canvas = document.getElementById('meuGrafico');
+            const ctx2d  = canvas.getContext('2d');
+
+            // Calcula valor máximo para definir a altura da barra fantasma
+            const maxVal = Math.max(...labels.flatMap(l =>
+                cats.map(c => f.filter(r=>r.data===l&&r.cat===c).reduce((s,r)=>s+r.valor,0))
+            ), 1);
+            const ghostHeight = maxVal * 0.04; // 4% do máximo — barra stub visível mas discreta
+
+            const datasets = cats.map(c => {
+                const values = labels.map(l => f.filter(r=>r.data===l&&r.cat===c).reduce((s,r)=>s+r.valor,0));
+                // Guarda valores reais por label
+                if (!realValues[c]) realValues[c] = {};
+                labels.forEach((l, i) => realValues[c][l] = values[i]);
+
+                // Substitui zeros por uma altura mínima visual (barra fantasma)
+                const displayValues = values.map(v => v === 0 ? ghostHeight : v);
+
+                return {
+                    label: c,
+                    // cores serão aplicadas por item no plugin afterDatasetDraw
+                    backgroundColor: displayValues.map((v, i) =>
+                        values[i] === 0
+                            ? cores[c] + '28'   // fantasma: muito transparente
+                            : cores[c] + 'e0'   // barra real: sólida com leve transparência
+                    ),
+                    hoverBackgroundColor: displayValues.map((v, i) =>
+                        values[i] === 0
+                            ? cores[c] + '44'
+                            : cores[c]
+                    ),
+                    borderColor: displayValues.map((v, i) =>
+                        values[i] === 0 ? cores[c] + '55' : 'transparent'
+                    ),
+                    borderWidth: displayValues.map((v, i) => values[i] === 0 ? 1 : 0),
+                    borderDash: [4, 3],
+                    data: displayValues,
+                    realData: values,   // campo extra para o tooltip
+                    borderRadius: 7,
+                    borderSkipped: false,
+                    barThickness: 22,
+                    minBarLength: 18,
+                };
+            });
 
             if (chart) chart.destroy();
-            chart = new Chart(document.getElementById('meuGrafico'), {
+
+            // Plugin: espaço entre legenda e gráfico
+            const legendGap = {
+                id: 'legendGap',
+                beforeInit(ch) {
+                    const fit = ch.legend.fit.bind(ch.legend);
+                    ch.legend.fit = function() { fit(); this.height += 24; };
+                }
+            };
+
+            chart = new Chart(canvas, {
                 type: 'bar',
+                plugins: [legendGap],
                 data: { labels, datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    categoryPercentage: 0.68,
+                    barPercentage: 0.88,
+                    interaction: {
+                        mode: 'nearest',
+                        intersect: true,
+                        axis: 'xy'
+                    },
                     scales: {
                         y: {
                             beginAtZero: true,
-                            grid: { color: '#1e293b' },
+                            grid: {
+                                color: ctx => ctx.tick.value === 0 ? '#2a3441' : '#1a2740',
+                                lineWidth: ctx => ctx.tick.value === 0 ? 1.5 : 1,
+                            },
+                            border: { display: false },
                             ticks: {
                                 callback: v => 'R$ ' + v.toLocaleString('pt-BR'),
                                 font: { family: "'JetBrains Mono', monospace", size: 10 },
-                                maxTicksLimit: 6
+                                maxTicksLimit: 6,
+                                color: '#64748b'
                             }
                         },
                         x: {
                             grid: { display: false },
+                            border: { display: false },
                             ticks: {
-                                font: { family: "'DM Sans', sans-serif", size: 11 },
-                                maxRotation: 45, minRotation: 0
+                                font: { family: "'DM Sans', sans-serif", size: 11, weight: '500' },
+                                maxRotation: 0,
+                                minRotation: 0,
+                                padding: 10,
+                                color: '#94a3b8'
                             }
                         }
                     },
                     plugins: {
                         legend: {
                             position: 'top',
+                            align: 'start',
                             labels: {
-                                usePointStyle: true, pointStyle: 'circle',
-                                padding: 16,
-                                font: { family: "'DM Sans', sans-serif", size: 12, weight: '500' }
+                                usePointStyle: true,
+                                pointStyle: 'circle',
+                                padding: 22,
+                                font: { family: "'DM Sans', sans-serif", size: 13, weight: '600' },
+                                boxHeight: 9,
+                                color: '#cbd5e1'
                             }
                         },
                         tooltip: {
-                            backgroundColor: '#1a2332',
-                            titleColor: '#f1f5f9', bodyColor: '#94a3b8',
-                            borderColor: '#2a3441', borderWidth: 1,
-                            cornerRadius: 8, padding: 12,
-                            titleFont: { family: "'DM Sans', sans-serif", size: 13, weight: '600' },
-                            bodyFont: { family: "'JetBrains Mono', monospace", size: 12 },
+                            mode: 'nearest',
+                            intersect: true,
+                            backgroundColor: '#0f1929',
+                            titleColor: '#f1f5f9',
+                            bodyColor: '#94a3b8',
+                            borderColor: '#2a3441',
+                            borderWidth: 1,
+                            cornerRadius: 10,
+                            padding: 14,
+                            displayColors: true,
+                            boxWidth: 10, boxHeight: 10,
+                            titleFont: { family: "'DM Sans', sans-serif", size: 12, weight: '600' },
+                            bodyFont: { family: "'JetBrains Mono', monospace", size: 14, weight: '700' },
                             callbacks: {
-                                label: ctx => `${ctx.dataset.label}: ${fmt(ctx.parsed.y)}`
+                                title: ctx => '📅 ' + ctx[0].label,
+                                label: ctx => {
+                                    // Usa o valor real, não o display (que pode ser ghostHeight)
+                                    const real = ctx.dataset.realData[ctx.dataIndex];
+                                    const label = ctx.dataset.label;
+                                    const icon = { "Dízimo":"●","Oferta":"●","Malawi":"●","Campanha":"●" }[label] || '●';
+                                    if (real === 0) return `  ${label}: —`;
+                                    return `  ${label}: ${fmt(real)}`;
+                                },
+                                labelColor: ctx => {
+                                    const cores = { "Dízimo":"#10b981","Oferta":"#3b82f6","Malawi":"#f59e0b","Campanha":"#ef4444" };
+                                    const c = cores[ctx.dataset.label] || '#fff';
+                                    return { borderColor: c, backgroundColor: c, borderRadius: 4 };
+                                }
                             }
                         }
                     }
