@@ -35,7 +35,6 @@
             gap: 14px;
             margin-bottom: 20px;
         }
-
         .card {
             background: var(--bg-secondary);
             border-radius: 12px;
@@ -54,18 +53,8 @@
             bottom: 0; left: 0; right: 0;
             height: 3px;
         }
-        .card span {
-            font-size: 10px; font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase; letter-spacing: 1.2px;
-        }
-        .card strong {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 26px; font-weight: 700;
-            margin-top: 6px;
-            letter-spacing: -1px;
-        }
-
+        .card span { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.2px; }
+        .card strong { font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; margin-top: 6px; letter-spacing: -1px; }
         .card-ativos::after  { background: linear-gradient(90deg, var(--accent-blue), #2563eb); }
         .card-ativos strong  { color: var(--accent-blue); }
         .card-total::after   { background: linear-gradient(90deg, var(--accent), #047857); }
@@ -82,9 +71,7 @@
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
         }
-
         table { width: 100%; border-collapse: collapse; min-width: 360px; }
-
         th {
             background: var(--bg-card);
             padding: 14px 16px;
@@ -95,65 +82,206 @@
             text-transform: uppercase; letter-spacing: 0.5px;
             white-space: nowrap;
         }
-
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border);
-            font-size: 13px;
-            white-space: nowrap;
-        }
+        td { padding: 14px 16px; border-bottom: 1px solid var(--border); font-size: 13px; white-space: nowrap; }
         tr:last-child td { border-bottom: none; }
-        tr:hover td { background: rgba(16,185,129,0.05); }
+
+        /* linhas clicáveis */
+        tr.linha-membro { cursor: pointer; transition: background 0.15s; }
+        tr.linha-membro:hover td { background: rgba(59,130,246,0.07); }
+        tr.linha-membro:active td { background: rgba(59,130,246,0.14); }
 
         .nome-membro { font-weight: 600; color: var(--text-primary); }
-        .telefone-membro {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px; color: var(--text-muted);
-        }
-        .valor-membro {
-            font-family: 'JetBrains Mono', monospace;
-            font-weight: 700; color: var(--accent);
-            text-align: right;
-        }
+        .telefone-membro { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); }
+        .valor-membro { font-family: 'JetBrains Mono', monospace; font-weight: 700; color: var(--accent); text-align: right; }
 
         .linha-separadora td {
             background: var(--bg-card) !important;
-            padding: 10px 16px;
-            font-size: 11px; font-weight: 600;
-            color: var(--warning) !important;
-            text-align: center;
+            padding: 10px 16px; font-size: 11px; font-weight: 600;
+            color: var(--warning) !important; text-align: center;
             text-transform: uppercase; letter-spacing: 0.5px;
             border-top: 2px solid var(--border);
         }
-        .texto-incerto td {
-            color: var(--text-muted) !important;
-            font-style: italic;
-            background: rgba(245,158,11,0.03);
+        .texto-incerto td { color: var(--text-muted) !important; font-style: italic; background: rgba(245,158,11,0.03); }
+
+        /* ── MODAL OVERLAY ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(5, 10, 20, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
         }
+        .modal-overlay.open { display: flex; }
+
+        /* ── MODAL CARD ── */
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+            overflow: hidden;
+            animation: slideUp 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)    scale(1); }
+        }
+
+        /* modal header */
+        .modal-header {
+            background: var(--bg-card);
+            padding: 18px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .modal-header-info { flex: 1; min-width: 0; }
+        .modal-nome {
+            font-size: 15px; font-weight: 700;
+            color: var(--text-primary);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .modal-tel {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; color: var(--text-muted);
+            margin-top: 5px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .modal-tel > svg { opacity: 0.5; flex-shrink: 0; }
+        .tel-copy {
+            display: inline-flex; align-items: center; gap: 6px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+            user-select: all;
+        }
+        .tel-copy:hover {
+            background: rgba(59,130,246,0.1);
+            border-color: rgba(59,130,246,0.25);
+            color: #60a5fa;
+        }
+        .tel-copy.copied {
+            background: rgba(16,185,129,0.1);
+            border-color: rgba(16,185,129,0.3);
+            color: #10b981;
+        }
+        .tel-copy-icon { opacity: 0.4; transition: opacity 0.15s; }
+        .tel-copy:hover .tel-copy-icon { opacity: 0.9; }
+        .modal-close {
+            background: rgba(255,255,255,0.06);
+            border: none; border-radius: 8px;
+            color: var(--text-muted); cursor: pointer;
+            width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+            transition: background 0.15s, color 0.15s;
+        }
+        .modal-close:hover { background: rgba(255,255,255,0.12); color: var(--text-primary); }
+
+        /* modal period filter */
+        .modal-filter {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .filter-label {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 11px; font-weight: 600;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px;
+            flex-shrink: 0;
+        }
+        .filter-label svg { color: var(--accent-blue); }
+        .modal-select {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px; font-weight: 500;
+            padding: 7px 10px;
+            cursor: pointer;
+            appearance: none;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+        .modal-select:focus { border-color: var(--accent-blue); }
+
+        /* modal body — category breakdown */
+        .modal-body { padding: 16px 20px 20px; }
+
+        .modal-total-label {
+            font-size: 10px; font-weight: 600;
+            color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .cat-rows { display: flex; flex-direction: column; gap: 10px; }
+
+        .cat-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+        }
+        .cat-dot {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+        }
+        .cat-row-label {
+            flex: 1;
+            font-size: 13px; font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .cat-row-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px; font-weight: 700;
+        }
+        .cat-row-value.zero { color: var(--text-muted); font-weight: 400; }
+
+        /* total row */
+        .cat-row-total {
+            background: rgba(16,185,129,0.07);
+            border-color: rgba(16,185,129,0.2);
+            margin-top: 4px;
+        }
+        .cat-row-total .cat-row-label { color: var(--text-primary); font-size: 13px; }
+        .cat-row-total .cat-row-value { color: var(--accent); font-size: 15px; }
+
+        /* progress bar inside each cat row */
+        .cat-bar-wrap {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+            background: transparent; border-radius: 0 0 10px 10px; overflow: hidden;
+        }
+        .cat-row { position: relative; overflow: hidden; }
+        .cat-bar { height: 2px; border-radius: 2px; transition: width 0.4s ease; }
 
         /* ── MOBILE ── */
         @media (max-width: 600px) {
             body { padding: 10px; }
-
-            /* Stack cards: 2 on top, 1 full-width below */
-            .area-resumo {
-                grid-template-columns: 1fr 1fr;
-                gap: 10px;
-            }
-            .card-total {
-                grid-column: 1 / -1;
-            }
-
+            .area-resumo { grid-template-columns: 1fr 1fr; gap: 10px; }
+            .card-total { grid-column: 1 / -1; }
             .card { padding: 14px 10px; }
             .card span { font-size: 9px; }
             .card strong { font-size: 20px; }
-
-            /* Hide phone column */
             .col-tel-header, .col-tel-cell { display: none; }
-
             th, td { padding: 12px 10px; }
+            .modal { max-width: 100%; }
         }
-
         @media (max-width: 380px) {
             .card strong { font-size: 17px; }
         }
@@ -161,7 +289,6 @@
 </head>
 <body>
 
-    <!-- Cards primeiro, em cima da tabela para mobile -->
     <div class="area-resumo">
         <div class="card card-ativos">
             <span>Membros Ativos</span>
@@ -190,17 +317,65 @@
         </table>
     </div>
 
+    <!-- ── MODAL ── -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modal">
+
+            <div class="modal-header">
+                <div class="modal-header-info">
+                    <div class="modal-nome" id="modalNome">—</div>
+                    <div class="modal-tel">
+                        <!-- phone icon -->
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.62 19a19.45 19.45 0 0 1-6-6A19.79 19.79 0 0 1 3.12 4.18 2 2 0 0 1 5.09 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L9.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                        </svg>
+                        <span class="tel-copy" id="modalTelCopy" title="Clique para copiar">
+                            <span id="modalTel">—</span>
+                            <!-- copy icon -->
+                            <svg class="tel-copy-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+                <button class="modal-close" id="modalClose">✕</button>
+            </div>
+
+            <div class="modal-filter">
+                <div class="filter-label">
+                    <!-- filter icon -->
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                    </svg>
+                    Período
+                </div>
+                <select class="modal-select" id="modalPeriodo">
+                    <option value="Todos">Todos os períodos</option>
+                </select>
+            </div>
+
+            <div class="modal-body">
+                <div class="modal-total-label">Contribuição por Categoria</div>
+                <div class="cat-rows" id="modalCatRows"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTVFsO0U3JTeEpqIks1fpNUNiHF5J6Pgyv7yYiJKFgqyI08Y_sRB2nnikRvfT4W5CcwQwAW5r0Lvt1x/pub?output=csv';
         let registros = [];
+        let membroAtivo = null; // dados completos do membro selecionado
 
         const padronizarTel = t => {
             let n = String(t).replace(/\D/g, "");
             if (n.length <= 11) n = "55" + (n.length <= 9 ? "24" : "") + (n.length === 8 ? "9" : "") + n;
             return n.length >= 12 ? `+${n.substring(0,2)} (${n.substring(2,4)}) ${n.substring(4,9)}-${n.substring(9,13)}` : "N/A";
         };
+        const fmt = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-        const formatarMoeda = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        const cats  = ["Dízimo","Oferta","Malawi","Campanha"];
+        const cores = { "Dízimo":"#10b981","Oferta":"#3b82f6","Malawi":"#f59e0b","Campanha":"#ef4444" };
 
         async function carregar() {
             try {
@@ -257,28 +432,146 @@
             const listaI = Object.values(incertos);
 
             document.getElementById('totalAtivos').innerText = lista.length;
-            document.getElementById('arrecadacaoTotal').innerText = formatarMoeda(somaTotal);
-            document.getElementById('mediaMembro').innerText = lista.length > 0 ? formatarMoeda(somaTotal / lista.length) : "R$ 0,00";
+            document.getElementById('arrecadacaoTotal').innerText = fmt(somaTotal);
+            document.getElementById('mediaMembro').innerText = lista.length > 0 ? fmt(somaTotal / lista.length) : "R$ 0,00";
 
-            let html = lista.map(m => `
-                <tr>
+            const makeRow = (m, incerto=false) => {
+                const key = m.tel || m.nome;
+                return `
+                <tr class="linha-membro ${incerto ? 'texto-incerto' : ''}" data-key="${key}" data-nome="${m.nome}" data-tel="${m.tel||''}">
                     <td class="nome-membro">${m.nome}</td>
                     <td class="telefone-membro col-tel-cell">${padronizarTel(m.tel)}</td>
-                    <td class="valor-membro">${formatarMoeda(m.total)}</td>
-                </tr>`).join('');
+                    <td class="valor-membro">${fmt(m.total)}</td>
+                </tr>`;
+            };
 
+            let html = lista.map(m => makeRow(m)).join('');
             if (listaI.length > 0) {
                 html += `<tr class="linha-separadora"><td colspan="3">⚠ Remetentes não Identificados</td></tr>`;
-                html += listaI.map(m => `
-                    <tr class="texto-incerto">
-                        <td>${m.nome}</td>
-                        <td class="col-tel-cell">${padronizarTel(m.tel)}</td>
-                        <td class="valor-membro">${formatarMoeda(m.total)}</td>
-                    </tr>`).join('');
+                html += listaI.map(m => makeRow(m, true)).join('');
             }
 
             document.getElementById('corpoMembros').innerHTML = html;
+
+            // Attach click handlers
+            document.querySelectorAll('tr.linha-membro').forEach(tr => {
+                tr.addEventListener('click', () => abrirModal(tr.dataset.nome, tr.dataset.tel));
+            });
         }
+
+        /* ── MODAL ── */
+        function getPeriodos(tel, nome) {
+            const regs = registros.filter(r => {
+                const key = r.telRaw || r.nome;
+                return key === (tel || nome) || r.nome === nome;
+            });
+            const meses = [...new Set(regs.map(r => r.mesAno))].sort((a,b) => {
+                const [m1,y1]=a.split('/'), [m2,y2]=b.split('/');
+                return new Date(y1,m1-1) - new Date(y2,m2-1);
+            });
+            const anos = [...new Set(regs.map(r => r.ano))].sort();
+            return { meses, anos };
+        }
+
+        function calcCats(tel, nome, periodo) {
+            return registros.filter(r => {
+                const key = r.telRaw || r.nome;
+                const matchMembro = key === (tel || nome) || r.nome === nome;
+                const matchPeriodo = periodo === "Todos" ? true
+                    : periodo.length === 4 ? r.ano === periodo
+                    : r.mesAno === periodo;
+                return matchMembro && matchPeriodo;
+            });
+        }
+
+        function renderModalCats(tel, nome, periodo) {
+            const regs = calcCats(tel, nome, periodo);
+            const totais = {};
+            cats.forEach(c => totais[c] = 0);
+            regs.forEach(r => { if (totais[r.cat] !== undefined) totais[r.cat] += r.valor; });
+            const total = Object.values(totais).reduce((s,v) => s+v, 0);
+
+            const rows = cats.map(c => {
+                const val = totais[c];
+                const pct = total > 0 ? (val / total * 100).toFixed(1) : 0;
+                return `
+                <div class="cat-row">
+                    <div class="cat-dot" style="background:${cores[c]}"></div>
+                    <div class="cat-row-label">${c}</div>
+                    <div class="cat-row-value ${val === 0 ? 'zero' : ''}" style="${val > 0 ? 'color:'+cores[c] : ''}">
+                        ${val > 0 ? fmt(val) : '—'}
+                    </div>
+                    <div class="cat-bar-wrap">
+                        <div class="cat-bar" style="width:${pct}%;background:${cores[c]};opacity:0.6"></div>
+                    </div>
+                </div>`;
+            }).join('');
+
+            const totalRow = `
+            <div class="cat-row cat-row-total">
+                <div class="cat-dot" style="background:var(--accent)"></div>
+                <div class="cat-row-label">Total</div>
+                <div class="cat-row-value">${fmt(total)}</div>
+            </div>`;
+
+            document.getElementById('modalCatRows').innerHTML = rows + totalRow;
+        }
+
+        function abrirModal(nome, tel) {
+            membroAtivo = { nome, tel };
+
+            document.getElementById('modalNome').textContent = nome;
+            document.getElementById('modalTel').textContent = padronizarTel(tel);
+
+            // Popular select de períodos
+            const { meses, anos } = getPeriodos(tel, nome);
+            const sel = document.getElementById('modalPeriodo');
+            sel.innerHTML = `<option value="Todos">Todos os períodos</option>`;
+            anos.forEach(a => {
+                const opt = document.createElement('option');
+                opt.value = a; opt.textContent = `Ano ${a}`;
+                sel.appendChild(opt);
+            });
+            meses.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m; opt.textContent = m;
+                sel.appendChild(opt);
+            });
+            sel.value = "Todos";
+
+            renderModalCats(tel, nome, "Todos");
+            document.getElementById('modalOverlay').classList.add('open');
+        }
+
+        function fecharModal() {
+            document.getElementById('modalOverlay').classList.remove('open');
+            membroAtivo = null;
+        }
+
+        document.getElementById('modalTelCopy').addEventListener('click', () => {
+            const tel = document.getElementById('modalTel').textContent;
+            if (!tel || tel === '—' || tel === 'N/A') return;
+            navigator.clipboard.writeText(tel).then(() => {
+                const el = document.getElementById('modalTelCopy');
+                const span = document.getElementById('modalTel');
+                el.classList.add('copied');
+                span.textContent = 'Copiado!';
+                setTimeout(() => {
+                    el.classList.remove('copied');
+                    span.textContent = tel;
+                }, 1800);
+            });
+        });
+
+        document.getElementById('modalClose').addEventListener('click', fecharModal);
+        document.getElementById('modalOverlay').addEventListener('click', e => {
+            if (e.target === document.getElementById('modalOverlay')) fecharModal();
+        });
+        document.getElementById('modalPeriodo').addEventListener('change', e => {
+            if (!membroAtivo) return;
+            renderModalCats(membroAtivo.tel, membroAtivo.nome, e.target.value);
+        });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharModal(); });
 
         window.addEventListener('message', e => renderizar(e.data.categoria, e.data.periodo));
         carregar();
