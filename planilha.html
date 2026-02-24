@@ -156,13 +156,15 @@
             registros = csv.split('\n').slice(1).filter(l=>l.trim()).map(l=>{
                 const c = l.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v=>v.replace(/^"|"$/g,'').trim());
                 let [d,m,a] = c[0].split('/');
+                // sortKey numérico: AAAAMMDD — comparação perfeita sem depender de Date
+                const sortKey = parseInt((a||'0').padStart(4,'0') + (m||'0').padStart(2,'0') + (d||'0').padStart(2,'0'), 10);
                 return {
                     data: c[0], mesAno: `${m}/${a}`, ano: a,
                     tel: padronizarTel(c[1]), nome: c[2].toUpperCase(),
                     valor: c[3], cat: c[4].toLowerCase().includes("dizimo") ? "Dízimo" : c[4],
-                    sort: new Date(a, m-1, d)
+                    sortKey
                 };
-            }).sort((a,b)=>b.sort - a.sort);
+            }).sort((a,b) => b.sortKey - a.sortKey);
             renderizar();
         }
 
